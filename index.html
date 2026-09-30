@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Gestão de Frotas</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#eef2f6;--panel:#fff;--text:#18212f;--muted:#667085;--line:#e7ebf0;--blue:#2563eb;--blue2:#60a5fa;--green:#16a34a;--orange:#f59e0b;--purple:#7c3aed;--cyan:#0891b2;--shadow:0 12px 32px rgba(16,24,40,.08);--radius:18px}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#edf2f7 0%,#f8fafc 45%,#eef4ff 100%);color:var(--text);font-family:Inter,Segoe UI,Roboto,Arial,sans-serif}
+.wrap{max-width:1540px;margin:0 auto;padding:22px}.header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:14px}.brand{display:flex;gap:14px;align-items:center}.logo{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,#1d4ed8,#60a5fa);color:#fff;font-size:24px;font-weight:800;box-shadow:0 9px 22px rgba(37,99,235,.25)}h1{font-size:25px;line-height:1.15;margin:0 0 5px;font-weight:780;letter-spacing:-.4px}.sub{color:var(--muted);font-size:13px}.updated{background:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.95);padding:10px 13px;border-radius:12px;color:#667085;font-size:12px;box-shadow:var(--shadow)}
+.card{background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.98);border-radius:var(--radius);box-shadow:var(--shadow)}.panel{padding:16px}.section-title{font-size:14px;font-weight:780}.section-sub{font-size:11px;color:var(--muted);margin-top:4px}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}.pill{padding:5px 9px;border-radius:999px;background:#eef4ff;color:#1d4ed8;font-size:10px;font-weight:760}
+.vehicle-select{padding:14px 16px;margin-bottom:14px}.vehicle-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.vehicle-label{min-width:86px}.vehicle-label strong{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.65px;color:#7b8798}.vehicle-label span{display:block;font-size:10px;color:#98a2b3;margin-top:2px}.nav-btn{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:#fff;font-size:21px;cursor:pointer;display:grid;place-items:center;font-weight:700}.nav-btn:hover{border-color:#aab8cf;background:#f8fbff}.vehicle-select-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:220px}.vehicle-selectbox{flex:1;min-width:180px;border:1px solid #d9e0e8;border-radius:11px;padding:10px 12px;background:#fff;font-size:14px;font-weight:800;color:var(--text);outline:none}.vehicle-name{font-size:10px;color:#98a2b3}.plate-edit{display:flex;gap:8px;align-items:center}.plate-edit input{width:130px;border:1px solid #d9e0e8;border-radius:10px;padding:9px 10px;font-size:12px;font-weight:760}.btn{border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:10px;font-size:11px;font-weight:740;cursor:pointer}.btn.primary{border-color:#2563eb;background:#2563eb;color:#fff}.vehicle-count{font-size:10px;color:#98a2b3;margin-left:auto}
+.kpi-card{padding:15px 14px;min-width:0}.kpi-title{font-size:10px;color:#7b8798;font-weight:760;text-transform:uppercase;letter-spacing:.55px}.kpi-values{display:grid;grid-template-columns:1fr 1px 1fr;gap:11px;margin-top:10px;align-items:stretch}.kpi-divider{width:1px;background:var(--line)}.kpi-label{font-size:9px;color:#98a2b3;text-transform:uppercase;letter-spacing:.45px}.kpi-value{font-size:18px;font-weight:820;letter-spacing:-.4px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.kpi-note{font-size:9px;color:#98a2b3;margin-top:3px}
+.kpi-board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}.dashboard{display:grid;grid-template-columns:1.45fr .95fr;gap:14px}.chart-box{height:290px}.chart-box.tall{height:330px}.bottom{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-top:14px}.table-wrap{overflow:auto;max-height:390px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:right}th:first-child,td:first-child{text-align:left}th{font-size:10px;color:#7a8699;text-transform:uppercase;letter-spacing:.45px}td:first-child{font-weight:760}.footnote{font-size:10px;color:#98a2b3;margin-top:10px}.selected-strip{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;margin-top:14px;background:#f8fbff;border:1px solid #e4ecfb;border-radius:13px}.selected-strip strong{font-size:13px}.selected-strip span{font-size:10px;color:#667085}
+@media(max-width:1200px){.kpi-board{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:820px){.dashboard,.bottom{grid-template-columns:1fr}.kpi-board{grid-template-columns:1fr}.vehicle-count{margin-left:0}.plate-edit{width:100%}.plate-edit input{flex:1;width:auto}}
+@media(max-width:560px){.wrap{padding:12px}.header{flex-direction:column}.vehicle-row{align-items:stretch}.vehicle-select-wrap{width:100%}.vehicle-label{min-width:100%}.nav-btn{width:44px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="header"><div class="brand"><div class="logo">F</div><div><h1>Gestão de Frotas</h1><div class="sub">R$ mil · indicadores por veículo</div></div></div><div class="updated">Atualizado em 30/09/2026 16:30</div></header>
+
+<section class="card vehicle-select">
+  <div class="panel-head"><div><div class="section-title">Veículo selecionado</div><div class="section-sub">Todas as placas ficam neste único campo. Use as setas ou a lista para trocar o veículo.</div></div><span class="pill" id="vehiclePosition">1 / 7</span></div>
+  <div class="vehicle-row">
+    <div class="vehicle-label"><strong>Placa</strong><span>seletor da frota</span></div>
+    <button class="nav-btn" onclick="moveVehicle(-1)" aria-label="Veículo anterior">‹</button>
+    <div class="vehicle-select-wrap"><select id="vehicleSelect" class="vehicle-selectbox" onchange="selectVehicle(this.value)"></select><span class="vehicle-count" id="vehicleIndexLabel"></span></div>
+    <button class="nav-btn" onclick="moveVehicle(1)" aria-label="Próximo veículo">›</button>
+    <div class="plate-edit"><input id="plateEditor" maxlength="12" aria-label="Editar placa"><button class="btn primary" onclick="savePlate()">Alterar placa</button></div>
+  </div>
+  <div class="footnote">A alteração do nome da placa é visual. Os números continuam vinculados ao veículo da mesma posição na base do Excel.</div>
+</section>
+
+<section class="kpi-board" id="kpiBoard">
+  <div class="card kpi-card" data-kpi="abastecimento"><div class="kpi-title">Abastecimento</div><div class="kpi-values"><div><div class="kpi-label">Média mensal</div><div class="kpi-value" id="avg_abastecimento">-</div><div class="kpi-note">12 meses</div></div><div class="kpi-divider"></div><div><div class="kpi-label">Total período</div><div class="kpi-value" id="total_abastecimento">-</div><div class="kpi-note">jan → dez</div></div></div></div>
+  <div class="card kpi-card" data-kpi="pedagio"><div class="kpi-title">Pedágio</div><div class="kpi-values"><div><div class="kpi-label">Média mensal</div><div class="kpi-value" id="avg_pedagio">-</div><div class="kpi-note">12 meses</div></div><div class="kpi-divider"></div><div><div class="kpi-label">Total período</div><div class="kpi-value" id="total_pedagio">-</div><div class="kpi-note">jan → dez</div></div></div></div>
+  <div class="card kpi-card" data-kpi="litros"><div class="kpi-title">Litros</div><div class="kpi-values"><div><div class="kpi-label">Média mensal</div><div class="kpi-value" id="avg_litros">-</div><div class="kpi-note">12 meses</div></div><div class="kpi-divider"></div><div><div class="kpi-label">Total período</div><div class="kpi-value" id="total_litros">-</div><div class="kpi-note">jan → dez</div></div></div></div>
+  <div class="card kpi-card" data-kpi="km"><div class="kpi-title">KM</div><div class="kpi-values"><div><div class="kpi-label">Média mensal</div><div class="kpi-value" id="avg_km">-</div><div class="kpi-note">12 meses</div></div><div class="kpi-divider"></div><div><div class="kpi-label">Total período</div><div class="kpi-value" id="total_km">-</div><div class="kpi-note">jan → dez</div></div></div></div>
+  <div class="card kpi-card" data-kpi="m3"><div class="kpi-title">M³</div><div class="kpi-values"><div><div class="kpi-label">Média mensal</div><div class="kpi-value" id="avg_m3">-</div><div class="kpi-note">12 meses</div></div><div class="kpi-divider"></div><div><div class="kpi-label">Total período</div><div class="kpi-value" id="total_m3">-</div><div class="kpi-note">jan → dez</div></div></div></div>
+  <div class="card kpi-card" data-kpi="qnt_nf"><div class="kpi-title">Qnt NF's</div><div class="kpi-values"><div><div class="kpi-label">Média mensal</div><div class="kpi-value" id="avg_qnt_nf">-</div><div class="kpi-note">12 meses</div></div><div class="kpi-divider"></div><div><div class="kpi-label">Total período</div><div class="kpi-value" id="total_qnt_nf">-</div><div class="kpi-note">jan → dez</div></div></div></div>
+  <div class="card kpi-card" data-kpi="valor_nf"><div class="kpi-title">Valor NF's</div><div class="kpi-values"><div><div class="kpi-label">Média mensal</div><div class="kpi-value" id="avg_valor_nf">-</div><div class="kpi-note">12 meses</div></div><div class="kpi-divider"></div><div><div class="kpi-label">Total período</div><div class="kpi-value" id="total_valor_nf">-</div><div class="kpi-note">jan → dez</div></div></div></div>
+  <div class="card kpi-card" data-kpi="kml"><div class="kpi-title">Média KM/L</div><div class="kpi-values"><div><div class="kpi-label">Média mensal</div><div class="kpi-value" id="avg_kml">-</div><div class="kpi-note">das medições</div></div><div class="kpi-divider"></div><div><div class="kpi-label">KM/L calculado</div><div class="kpi-value" id="total_kml">-</div><div class="kpi-note">KM ÷ litros</div></div></div></div>
+</section>
+
+<section class="card panel"><div class="panel-head"><div><div class="section-title" id="selectedTitle">Evolução do veículo</div><div class="section-sub">Abastecimento e Pedágio do veículo selecionado por mês</div></div><span class="pill">2026</span></div><div class="chart-box tall"><canvas id="chartSelected"></canvas></div></section>
+
+<section class="dashboard" style="margin-top:14px"><div class="card panel"><div class="panel-head"><div><div class="section-title">Evolução mensal da frota</div><div class="section-sub">Abastecimento total por mês</div></div><span class="pill">2026</span></div><div class="chart-box tall"><canvas id="chartAbastecimento"></canvas></div></div><div class="card panel"><div class="panel-head"><div><div class="section-title">Distribuição de custos</div><div class="section-sub">Abastecimento × Pedágio</div></div></div><div class="chart-box"><canvas id="chartCustos"></canvas></div></div></section>
+
+<section class="dashboard" style="margin-top:14px"><div class="card panel"><div class="panel-head"><div><div class="section-title">Evolução mensal do pedágio</div><div class="section-sub">Soma dos veículos por mês</div></div><span class="pill">2026</span></div><div class="chart-box"><canvas id="chartPedagio"></canvas></div></div><div class="card panel"><div class="panel-head"><div><div class="section-title">Volume × distância</div><div class="section-sub">Litros e KM registrados no mesmo período</div></div></div><div class="chart-box"><canvas id="chartVolumeKm"></canvas></div></div></section>
+
+<section class="bottom"><div class="card panel"><div class="panel-head"><div><div class="section-title">Abastecimento por veículo</div><div class="section-sub">Total do período, usando as placas da posição da frota</div></div></div><div class="chart-box"><canvas id="chartVeiculos"></canvas></div></div><div class="card panel"><div class="panel-head"><div><div class="section-title">Resumo por veículo</div><div class="section-sub">Todos os veículos continuam disponíveis na base</div></div></div><div class="table-wrap"><table><thead><tr><th>Placa</th><th>Abast.</th><th>Pedágio</th><th>KM</th><th>Litros</th><th>KM/L</th></tr></thead><tbody id="vehicleTable"></tbody></table></div></div></section>
+
+<section class="selected-strip"><div><strong id="selectedFooter">Veículo selecionado</strong><div>As médias e totais acima acompanham automaticamente a placa escolhida.</div></div><span>Setas ‹ › ou lista</span></section>
+</div>
+
+<script>
+const MONTHS=["jan/26","fev/26","mar/26","abr/26","mai/26","jun/26","jul/26","ago/26","set/26","out/26","nov/26","dez/26"];
+const BASE_PLATES=["KXJ 9G23","KZB 7D17","LPM 7D78","RYC 0E11","RYO 6A52","RYO 5E02","LTX 8D59"];
+const DATA={"abastecimento":{"monthly":[27792.0,1855.0,1953.0,4139.0,2610.0,35533.0,14327.0,35531.0,2435.0,557958.0,4530.0,4968.0],"total":693631.0,"average":57802.583333333336,"byVehicle":[650971.0,22236.0,5899.0,4679.0,2932.0,3286.0,3628.0],"vehicleAverage":[54247.583333333336,1853.0,491.5833333333333,389.9166666666667,244.33333333333334,273.8333333333333,302.3333333333333],"vehicleMonthly":[[22222.0,2.0,2.0,2233.0,333.0,33333.0,333.0,33333.0,125.0,555555.0,1690.0,1810.0],[2222.0,655.0,690.0,672.0,705.0,730.0,12312.0,765.0,800.0,835.0,890.0,960.0],[410.0,425.0,448.0,436.0,462.0,478.0,492.0,508.0,532.0,556.0,512.0,640.0],[2222.0,252.0,268.0,12.0,276.0,288.0,296.0,306.0,12.0,1.0,358.0,388.0],[246.0,12.0,4.0,261.0,277.0,123.0,297.0,307.0,321.0,336.0,359.0,389.0],[222.0,254.0,270.0,262.0,278.0,290.0,298.0,3.0,322.0,337.0,360.0,390.0],[248.0,255.0,271.0,263.0,279.0,291.0,299.0,309.0,323.0,338.0,361.0,391.0]]},"pedagio":{"monthly":[3211.0,2094.0,2974.0,1672.0,2273.0,1639.0,2335.0,2500.0,25542.0,3478.0,2920.0,4698.0],"total":55336.0,"average":4611.333333333333,"byVehicle":[30530.0,6793.0,5632.0,2849.0,2814.0,3353.0,3365.0],"vehicleAverage":[2544.1666666666665,566.0833333333334,469.3333333333333,237.41666666666666,234.5,279.4166666666667,280.4166666666667],"vehicleMonthly":[[1180.0,125.0,1290.0,1.0,1.0,5.0,1410.0,2.0,23124.0,1580.0,2.0,1810.0],[640.0,655.0,690.0,672.0,705.0,3.0,12.0,765.0,800.0,1.0,890.0,960.0],[410.0,555.0,448.0,436.0,462.0,478.0,12.0,508.0,532.0,556.0,595.0,640.0],[245.0,252.0,4.0,260.0,276.0,288.0,12.0,306.0,125.0,335.0,358.0,388.0],[245.0,2.0,5.0,260.0,276.0,288.0,296.0,306.0,320.0,335.0,358.0,123.0],[245.0,252.0,268.0,21.0,276.0,288.0,296.0,306.0,320.0,335.0,358.0,388.0],[246.0,253.0,269.0,22.0,277.0,289.0,297.0,307.0,321.0,336.0,359.0,389.0]]},"litros":{"monthly":[13911.0,2115.0,3506.0,2998.0,3607.0,3270.0,2487.0,2508.0,3372.0,3000.0,4085.0,4373.0],"total":49232.0,"average":4102.666666666667,"byVehicle":[11941.0,19428.0,3423.0,3592.0,3604.0,3616.0,3628.0],"vehicleAverage":[995.0833333333334,1619.0,285.25,299.3333333333333,300.3333333333333,301.3333333333333,302.3333333333333],"vehicleMonthly":[[3.0,21.0,1290.0,1260.0,1330.0,1375.0,57.0,5.0,1520.0,1580.0,1690.0,1810.0],[12512.0,655.0,690.0,672.0,705.0,730.0,748.0,765.0,34.0,67.0,890.0,960.0],[410.0,425.0,448.0,20.0,462.0,7.0,492.0,508.0,532.0,7.0,67.0,45.0],[245.0,252.0,268.0,260.0,276.0,288.0,296.0,306.0,320.0,335.0,358.0,388.0],[246.0,253.0,269.0,261.0,277.0,289.0,297.0,307.0,321.0,336.0,359.0,389.0],[247.0,254.0,270.0,262.0,278.0,290.0,298.0,308.0,322.0,337.0,360.0,390.0],[248.0,255.0,271.0,263.0,279.0,291.0,299.0,309.0,323.0,338.0,361.0,391.0]]},"km":{"monthly":[2577.0,1733.0,3506.0,3414.0,2906.0,3741.0,2345.0,2004.0,2622.0,1910.0,4018.0,4642.0],"total":35418.0,"average":2951.5,"byVehicle":[11398.0,6592.0,4036.0,3330.0,3342.0,3354.0,3366.0],"vehicleAverage":[949.8333333333334,549.3333333333334,336.3333333333333,277.5,278.5,279.5,280.5],"vehicleMonthly":[[1180.0,41.0,1290.0,1260.0,1330.0,1375.0,1410.0,3.0,4.0,5.0,1690.0,1810.0],[1.0,655.0,690.0,672.0,4.0,730.0,748.0,765.0,800.0,3.0,890.0,634.0],[410.0,23.0,448.0,436.0,462.0,478.0,45.0,6.0,532.0,556.0,0.0,640.0],[245.0,252.0,268.0,260.0,276.0,288.0,34.0,306.0,320.0,335.0,358.0,388.0],[246.0,253.0,269.0,261.0,277.0,289.0,35.0,307.0,321.0,336.0,359.0,389.0],[247.0,254.0,270.0,262.0,278.0,290.0,36.0,308.0,322.0,337.0,360.0,390.0],[248.0,255.0,271.0,263.0,279.0,291.0,37.0,309.0,323.0,338.0,361.0,391.0]]},"m3":{"monthly":[3216.0,3309.0,59.0,2983.0,3607.0,3017.0,1770.0,2504.0,1413.0,3489.0,4613.0,4968.0],"total":34948.0,"average":2912.3333333333335,"byVehicle":[11493.0,5386.0,4697.0,3325.0,3337.0,3349.0,3361.0],"vehicleAverage":[957.75,448.8333333333333,391.4166666666667,277.0833333333333,278.0833333333333,279.0833333333333,280.0833333333333],"vehicleMonthly":[[1180.0,1215.0,34.0,1260.0,1330.0,1375.0,15.0,1.0,3.0,1580.0,1690.0,1810.0],[640.0,655.0,12.0,672.0,705.0,6.0,73.0,765.0,1.0,7.0,890.0,960.0],[410.0,425.0,3.0,5.0,462.0,478.0,492.0,508.0,123.0,556.0,595.0,640.0],[245.0,252.0,1.0,260.0,276.0,288.0,296.0,306.0,320.0,335.0,358.0,388.0],[246.0,253.0,2.0,261.0,277.0,289.0,297.0,307.0,321.0,336.0,359.0,389.0],[247.0,254.0,3.0,262.0,278.0,290.0,298.0,308.0,322.0,337.0,360.0,390.0],[248.0,255.0,4.0,263.0,279.0,291.0,299.0,309.0,323.0,338.0,361.0,391.0]]},"qnt_nf":{"monthly":[2578.0,9145.0,2706.0,2743.0,3607.0,1639.0,2135.0,3194.0,2155.0,3488.0,3779.0,9686.0],"total":46855.0,"average":3904.5833333333335,"byVehicle":[20268.0,4457.0,10778.0,2820.0,2832.0,2844.0,2856.0],"vehicleAverage":[1689.0,371.4166666666667,898.1666666666666,235.0,236.0,237.0,238.0],"vehicleMonthly":[[1180.0,1215.0,1290.0,1260.0,1330.0,1.0,1410.0,1455.0,1.0,1580.0,1690.0,7856.0],[2.0,1231.0,690.0,1.0,705.0,2.0,3.0,1.0,800.0,6.0,56.0,960.0],[410.0,5685.0,448.0,436.0,462.0,478.0,492.0,508.0,68.0,556.0,595.0,640.0],[245.0,252.0,68.0,260.0,276.0,288.0,56.0,306.0,320.0,335.0,358.0,56.0],[246.0,253.0,69.0,261.0,277.0,289.0,57.0,307.0,321.0,336.0,359.0,57.0],[247.0,254.0,70.0,262.0,278.0,290.0,58.0,308.0,322.0,337.0,360.0,58.0],[248.0,255.0,71.0,263.0,279.0,291.0,59.0,309.0,323.0,338.0,361.0,59.0]]},"valor_nf":{"monthly":[1447.0,5916.0,2796.0,3414.0,3247.0,1900.0,3437.0,3064.0,3344.0,2388.0,4613.0,4968.0],"total":40534.0,"average":3377.8333333333335,"byVehicle":[14612.0,4570.0,8040.0,3310.0,3322.0,3334.0,3346.0],"vehicleAverage":[1217.6666666666667,380.8333333333333,670.0,275.8333333333333,276.8333333333333,277.8333333333333,278.8333333333333],"vehicleMonthly":[[45.0,1215.0,1290.0,1260.0,1330.0,7.0,1410.0,1455.0,1520.0,1580.0,1690.0,1810.0],[6.0,234.0,3.0,672.0,345.0,730.0,345.0,345.0,6.0,34.0,890.0,960.0],[410.0,3453.0,425.0,436.0,462.0,5.0,492.0,34.0,532.0,556.0,595.0,640.0],[245.0,252.0,268.0,260.0,276.0,288.0,296.0,306.0,320.0,53.0,358.0,388.0],[246.0,253.0,269.0,261.0,277.0,289.0,297.0,307.0,321.0,54.0,359.0,389.0],[247.0,254.0,270.0,262.0,278.0,290.0,298.0,308.0,322.0,55.0,360.0,390.0],[248.0,255.0,271.0,263.0,279.0,291.0,299.0,309.0,323.0,56.0,361.0,391.0]]},"kml":{"monthly":[1027.0,2428.0,1532.0,1831.0,1921.0,1686.0,2464.0,2537.0,3064.0,2997.0,3796.0,4968.0],"total":null,"average":2520.9166666666665,"byVehicle":[0.9545264215727326,0.3393040971793288,1.1790826760151913,0.9270601336302895,0.9273029966703663,0.9275442477876106,0.9277839029768468],"vehicleAverage":[547.5,407.0833333333333,464.6666666666667,273.9166666666667,274.9166666666667,275.9166666666667,276.9166666666667],"vehicleMonthly":[[3.0,334.0,3.0,345.0,345.0,46.0,34.0,34.0,346.0,1580.0,1690.0,1810.0],[34.0,655.0,3.0,4.0,4.0,4.0,748.0,765.0,800.0,835.0,73.0,960.0],[4.0,425.0,448.0,436.0,462.0,478.0,492.0,508.0,532.0,556.0,595.0,640.0],[245.0,252.0,268.0,260.0,276.0,288.0,296.0,306.0,345.0,5.0,358.0,388.0],[246.0,253.0,269.0,261.0,277.0,289.0,297.0,307.0,346.0,6.0,359.0,389.0],[247.0,254.0,270.0,262.0,278.0,290.0,298.0,308.0,347.0,7.0,360.0,390.0],[248.0,255.0,271.0,263.0,279.0,291.0,299.0,309.0,348.0,8.0,361.0,391.0]]}};
+let labels=BASE_PLATES.slice();
+let selectedIndex=0;
+const charts={};
+const fmt0=new Intl.NumberFormat('pt-BR',{maximumFractionDigits:0});
+const fmt2=new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt3=new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:3});
+Chart.defaults.font.family='Inter, Segoe UI, Arial, sans-serif';
+Chart.defaults.color='#667085';
+Chart.defaults.borderColor='#eef2f6';
+function n(v){return Number(v||0)}
+function money(v){return 'R$ '+fmt2.format(n(v))}
+function num(v){return fmt0.format(n(v))}
+function dec(v){return fmt3.format(n(v))}
+function safeText(v){return String(v||'').trim()||'-'}
+function escapeHtml(v){return safeText(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function loadSelector(){
+  const sel=document.getElementById('vehicleSelect');
+  sel.innerHTML=labels.map((p,i)=>`<option value="${i}">${i+1} · ${escapeHtml(p)}</option>`).join('');
+  sel.value=String(selectedIndex);
+  document.getElementById('plateEditor').value=safeText(labels[selectedIndex]);
+  document.getElementById('vehiclePosition').textContent=`${selectedIndex+1} / ${labels.length}`;
+  document.getElementById('vehicleIndexLabel').textContent=`VEÍCULO ${selectedIndex+1}`;
+}
+function selectVehicle(v){selectedIndex=Math.max(0,Math.min(labels.length-1,Number(v)||0));loadSelector();updateSelectedVehicle()}
+function moveVehicle(dir){selectVehicle((selectedIndex+dir+labels.length)%labels.length)}
+function savePlate(){
+  const v=safeText(document.getElementById('plateEditor').value);
+  if(v==='-')return;
+  labels[selectedIndex]=v;
+  loadSelector();
+  updateCharts();
+  updateTable();
+  updateSelectedVehicle();
+}
+function vehicleTotal(key,i){return n(DATA[key]?.byVehicle?.[i])}
+function vehicleAverage(key,i){return n(DATA[key]?.vehicleAverage?.[i])}
+function vehicleMonthly(key,i){return DATA[key]?.vehicleMonthly?.[i]||[]}
+function updateSelectedVehicle(){
+  const i=selectedIndex;
+  const title=`Veículo ${safeText(labels[i])}`;
+  document.getElementById('selectedTitle').textContent=`Evolução de ${title}`;
+  document.getElementById('selectedFooter').textContent=title;
+  const specs={
+    abastecimento:{avg:money(vehicleAverage('abastecimento',i)),total:money(vehicleTotal('abastecimento',i))},
+    pedagio:{avg:money(vehicleAverage('pedagio',i)),total:money(vehicleTotal('pedagio',i))},
+    litros:{avg:num(vehicleAverage('litros',i)),total:num(vehicleTotal('litros',i))},
+    km:{avg:num(vehicleAverage('km',i)),total:num(vehicleTotal('km',i))},
+    m3:{avg:num(vehicleAverage('m3',i)),total:num(vehicleTotal('m3',i))},
+    qnt_nf:{avg:num(vehicleAverage('qnt_nf',i)),total:num(vehicleTotal('qnt_nf',i))},
+    valor_nf:{avg:money(vehicleAverage('valor_nf',i)),total:money(vehicleTotal('valor_nf',i))},
+    kml:{avg:dec(vehicleAverage('kml',i)),total:dec(vehicleTotal('kml',i))}
+  };
+  Object.keys(specs).forEach(k=>{document.getElementById('avg_'+k).textContent=specs[k].avg;document.getElementById('total_'+k).textContent=specs[k].total});
+  const a=vehicleMonthly('abastecimento',i), p=vehicleMonthly('pedagio',i);
+  charts.selected.data.labels=MONTHS;
+  charts.selected.data.datasets[0].data=a;
+  charts.selected.data.datasets[1].data=p;
+  charts.selected.options.plugins.title.text=`${title} · Abastecimento e Pedágio`;
+  charts.selected.update();
+}
+function updateCharts(){
+  charts.abast.data.labels=MONTHS;charts.abast.data.datasets[0].data=DATA.abastecimento.monthly;charts.abast.update();
+  charts.pedagio.data.labels=MONTHS;charts.pedagio.data.datasets[0].data=DATA.pedagio.monthly;charts.pedagio.update();
+  charts.costos.data.datasets[0].data=[DATA.abastecimento.total,DATA.pedagio.total];charts.costos.update();
+  charts.volumeKm.data.labels=MONTHS;charts.volumeKm.data.datasets[0].data=DATA.litros.monthly;charts.volumeKm.data.datasets[1].data=DATA.km.monthly;charts.volumeKm.update();
+  charts.veiculos.data.labels=labels;charts.veiculos.data.datasets[0].data=DATA.abastecimento.byVehicle;charts.veiculos.update();
+}
+function updateTable(){
+ document.getElementById('vehicleTable').innerHTML=labels.map((p,i)=>`<tr><td>${escapeHtml(p)}</td><td>${money(vehicleTotal('abastecimento',i))}</td><td>${money(vehicleTotal('pedagio',i))}</td><td>${num(vehicleTotal('km',i))}</td><td>${num(vehicleTotal('litros',i))}</td><td>${dec(vehicleTotal('kml',i))}</td></tr>`).join('');
+}
+charts.selected=new Chart(document.getElementById('chartSelected'),{type:'line',data:{labels:MONTHS,datasets:[{label:'Abastecimento',data:vehicleMonthly('abastecimento',0),borderWidth:3,pointRadius:4,tension:.35,fill:true,backgroundColor:'rgba(37,99,235,.08)',borderColor:'#2563eb',pointBackgroundColor:'#2563eb'},{label:'Pedágio',data:vehicleMonthly('pedagio',0),borderWidth:2.5,pointRadius:3,tension:.35,fill:false,backgroundColor:'rgba(245,158,11,.08)',borderColor:'#f59e0b',pointBackgroundColor:'#f59e0b'}]},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:8}},title:{display:true,text:''},tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+money(c.parsed.y)}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#eef2f6'},ticks:{callback:v=>'R$ '+fmt0.format(v)}}}}});
+charts.abast=new Chart(document.getElementById('chartAbastecimento'),{type:'line',data:{labels:MONTHS,datasets:[{label:'Abastecimento',data:DATA.abastecimento.monthly,borderWidth:3,pointRadius:4,pointHoverRadius:6,fill:true,tension:.35,backgroundColor:'rgba(37,99,235,.08)',borderColor:'#2563eb',pointBackgroundColor:'#2563eb'}]},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' R$ '+fmt2.format(c.parsed.y)}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#eef2f6'},ticks:{callback:v=>'R$ '+fmt0.format(v)}}}}});
+charts.costos=new Chart(document.getElementById('chartCustos'),{type:'doughnut',data:{labels:['Abastecimento','Pedágio'],datasets:[{data:[DATA.abastecimento.total,DATA.pedagio.total],borderWidth:0,cutout:'70%',backgroundColor:['#2563eb','#f59e0b']}]},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:8,padding:15}},tooltip:{callbacks:{label:c=>' R$ '+fmt2.format(c.parsed)}}}}});
+charts.pedagio=new Chart(document.getElementById('chartPedagio'),{type:'bar',data:{labels:MONTHS,datasets:[{label:'Pedágio',data:DATA.pedagio.monthly,borderRadius:7,borderSkipped:false,backgroundColor:'#f59e0b'}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' R$ '+fmt2.format(c.parsed.y)}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#eef2f6'},ticks:{callback:v=>'R$ '+fmt0.format(v)}}}}});
+charts.volumeKm=new Chart(document.getElementById('chartVolumeKm'),{type:'line',data:{labels:MONTHS,datasets:[{label:'Litros',data:DATA.litros.monthly,borderWidth:2.5,tension:.3,borderColor:'#16a34a',pointBackgroundColor:'#16a34a'},{label:'KM',data:DATA.km.monthly,borderWidth:2.5,tension:.3,borderColor:'#7c3aed',pointBackgroundColor:'#7c3aed'}]},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:8}},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${fmt0.format(c.parsed.y)}`}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#eef2f6'},ticks:{callback:v=>fmt0.format(v)}}}}});
+charts.veiculos=new Chart(document.getElementById('chartVeiculos'),{type:'bar',data:{labels:labels,datasets:[{label:'Total',data:DATA.abastecimento.byVehicle,borderRadius:7,borderSkipped:false,backgroundColor:'#60a5fa'}]},options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' R$ '+fmt2.format(c.parsed.x)}}},scales:{x:{beginAtZero:true,grid:{color:'#eef2f6'},ticks:{callback:v=>'R$ '+fmt0.format(v)}},y:{grid:{display:false}}}}});
+loadSelector();updateSelectedVehicle();updateTable();
+</script>
+</body></html>
